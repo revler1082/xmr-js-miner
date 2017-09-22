@@ -1,0 +1,19 @@
+{
+  "name": "xmr-js-miner",
+  "version": "1.0.0",
+  "description": "monero javascript miner",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/revler1082/xmr-js-miner.git"
+  },
+  "author": "",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/revler1082/xmr-js-miner/issues"
+  },
+  "homepage": "https://github.com/revler1082/xmr-js-miner#readme"
+}
