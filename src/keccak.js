@@ -19,8 +19,10 @@
   /**
    * Creates Uint32Array(2) from Uint8Array(8).
    *
+   * TODO Create unit tests for this function.
+   *
    * @param ba8 {Uint8Array} of size 8
-   * @returns {Uint32Array} of size 2
+   * @returns {Uint32Array} of size 2 representing a Uint64
    */
   function load64(ba8) {
     var a64 = new Uint32Array(2);
@@ -40,7 +42,9 @@
   /**
    * Creates Uint8Array(8) from Uint32Array(2).
    *
-   * @param a64 {Uint32Array} of size 2
+   * TODO Create unit tests for this function.
+   *
+   * @param a64 {Uint32Array} of size 2 representing a Uint64
    * @returns {Uint8Array} of size 8
    */
   function store64(a64) {
@@ -58,31 +62,95 @@
    * Rotate left Uint32Array(2)
    *
    * FIXME Allocate a new array. Do not modify the array provided as an input.
+   * TODO Create unit tests for this function.
    *
-   * @param a64 {Uint32Array} of size 2
-   * @param n
-   * @returns {Uint32Array} of size 2
+   * @param a64 {Uint32Array} of size 2 representing a Uint64
+   * @param n {Uint8} number of bits to rotate left
+   * @returns {Uint32Array} of size 2 representing a Uint64
    */
   function rotl64(a64, n) {
     n = (n % 64) | 0;
 
-    var lo32 = a64[LO32];
-    var hi32 = a64[HI32];
+    var r64 = new Uint32Array(2);
 
     if (n === 0) {
-      return a64;
+      r64[LO32] = a64[LO32];
+      r64[HI32] = a64[HI32];
     } else if (n === 32) {
-      a64[HI32] = lo32;
-      a64[LO32] = hi32;
+      r64[LO32] = a64[HI32];
+      r64[HI32] = a64[LO32];
     } else if (n < 32) {
-      a64[HI32] = (lo32 << n) | (hi32 >> (32 - n));
-      a64[LO32] = (hi32 << n) | (lo32 >> (32 - n));
+      r64[LO32] = (a64[LO32] << n) | (a64[HI32] >> (32 - n));
+      r64[HI32] = (a64[HI32] << n) | (a64[LO32] >> (32 - n));
     } else if (n > 32) {
-      n = (32 - n) | 0;
-      a64[LO32] = (lo32 << n) | (hi32 >> (32 - n));
-      a64[HI32] = (hi32 << n) | (lo32 >> (32 - n));
+      n = (n - 32) | 0;
+      r64[LO32] = (a64[HI32] << n) | (a64[LO32] >> (32 - n));
+      r64[HI32] = (a64[LO32] << n) | (a64[HI32] >> (32 - n));
+    }
+    return r64;
+  }
+
+  /**
+   * XOR operation for Uint64 represented by Uint32Array.
+   *
+   * TODO Create unit tests for this function.
+   *
+   * @param [arg...] {Uint32Array} of size 2 representing a Uint64.
+   * @returns {Uint32Array} results of XOR from all the input.
+   */
+  function xor64() {
+    var a64 = new Uint32Array(2);
+    for (var i = 0; i < arguments.length; i++) {
+      var lo32 = arguments[i][LO32];
+      var hi32 = arguments[i][HI32];
+      if (i === 0) {
+        a64[LO32] = lo32;
+        a64[HI32] = hi32;
+      } else {
+        a64[LO32] = a64[LO32] ^ lo32;
+        a64[HI32] = a64[HI32] ^ hi32;
+      }
     }
     return a64;
+  }
+
+  /**
+   * AND operation for Uint64 represented by Uint32Array.
+   *
+   * TODO Create unit tests for this function.
+   *
+   * @param [arg...] {Uint32Array} of size 2 representing a Uint64.
+   * @returns {Uint32Array} results of AND from all the input.
+   */
+  function and64() {
+    var a64 = new Uint32Array(2);
+    for (var i = 0; i < arguments.length; i++) {
+      var lo32 = arguments[i][LO32];
+      var hi32 = arguments[i][HI32];
+      if (i === 0) {
+        a64[LO32] = lo32;
+        a64[HI32] = hi32;
+      } else {
+        a64[LO32] = a64[LO32] & lo32;
+        a64[HI32] = a64[HI32] & hi32;
+      }
+    }
+    return a64;
+  }
+
+  /**
+   * NOT operator for Uint64 represented by Uint32Array.
+   *
+   * TODO Create unit tests for this function.
+   *
+   * @param a64 {Uint32Array} of size 2 representing a Uint64.
+   * @returns {Uint32Array} with complement of the input.
+   */
+  function not64(a64) {
+    var n64 = new Uint32Array(2);
+    n64[LO32] = ~a64[LO32];
+    n64[HI32] = ~a64[HI32];
+    return n64;
   }
 
   var RANGE_5 = [0, 1, 2, 3, 4];
@@ -92,19 +160,20 @@
   function keccakF1600onLanes(lanes) {
     var R = 1;
     for (var round = 0; round < 24; round++) {
+
       // θ
       var C = RANGE_5.map(function (x) {
-        // FIXME Uint64 xor
-        return lanes[x][0] ^ lanes[x][1] ^ lanes[x][2] ^ lanes[x][3] ^ lanes[x][4];
+        return xor64(lanes[x][0], lanes[x][1], lanes[x][2], lanes[x][3], lanes[x][4]);
       });
       var D = RANGE_5.map(function (x) {
-        return C[(x + 4) % 5] ^ rotl64(C[(x + 1) % 5], 1); // FIXME Uint64 xor
+        return xor64(C[(x + 4) % 5], rotl64(C[(x + 1) % 5], 1));
       });
       lanes = RANGE_5.map(function (x) {
         return RANGE_5.map(function (y) {
-          return [lanes[x][y] ^ D[x]]; // FIXME Uint64 xor
+          return xor64(lanes[x][y], D[x]);
         });
       });
+
       // ρ and π
       var x = 1, y = 0;
       var current = lanes[x][y];
@@ -114,22 +183,23 @@
         current = lanes[x][y];
         lanes[x][y] = rotl64(current, ((t + 1) * (t + 2) / 2) | 0);
       }
+
       // χ
       RANGE_5.forEach(function (y) {
         var T = RANGE_5.map(function (x) {
           return lanes[x][y];
         });
         RANGE_5.forEach(function (x) {
-          // FIXME Implement a64 complement and a64 and
-          lanes[x][y] = T[x] ^ ((~T[(x + 1) % 5]) & T[(x + 2) % 5]);
+          lanes[x][y] = xor64(T[x], (and64((not64(T[(x + 1) % 5])), T[(x + 2) % 5])));
         });
       });
+
       // ι
       RANGE_7.forEach(function (j) {
         // FIXME Implement a64 shift right and shift left
-        R = ((R << 1) ^ ((R >> 7) * 0x71)) % 256;
+        R = (xor64((R << 1), ((R >> 7) * 0x71))) % 256;
         if (R & 2) {
-          lanes[0][0] = lanes[0][0] ^ (1 << ((1 << j) - 1));
+          lanes[0][0] = xor64(lanes[0][0], (1 << ((1 << j) - 1)));
         }
       });
     }
@@ -232,6 +302,9 @@
     "_keccak": keccak,
     "_keccakF1600": keccakF1600,
     "_keccakF1600onLanes": keccakF1600onLanes,
+    "_not64": not64,
+    "_and64": and64,
+    "_xor64": xor64,
     "_rotl64": rotl64,
     "_store64": store64,
     "_load64": load64
