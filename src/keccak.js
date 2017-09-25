@@ -50,10 +50,10 @@
   function store64(a64) {
     var ba8 = new Uint8Array(8);
     for (var i = 0; i < 4; i++) {
-      ba8[i] = (a64[LO32] >> (8 * i)) | 0;
+      ba8[i] = (a64[LO32] >>> (8 * i)) | 0;
     }
     for (var j = 4; j < 8; j++) {
-      ba8[j] = (a64[HI32] >> (8 * j)) | 0;
+      ba8[j] = (a64[HI32] >>> (8 * j)) | 0;
     }
     return ba8;
   }
@@ -77,12 +77,12 @@
       r64[LO32] = a64[HI32];
       r64[HI32] = a64[LO32];
     } else if (n < 32) {
-      r64[LO32] = (a64[LO32] << n) | (a64[HI32] >> (32 - n));
-      r64[HI32] = (a64[HI32] << n) | (a64[LO32] >> (32 - n));
+      r64[LO32] = (a64[LO32] << n) | (a64[HI32] >>> (32 - n));
+      r64[HI32] = (a64[HI32] << n) | (a64[LO32] >>> (32 - n));
     } else if (n > 32) {
       n = (n - 32) | 0;
-      r64[LO32] = (a64[HI32] << n) | (a64[LO32] >> (32 - n));
-      r64[HI32] = (a64[LO32] << n) | (a64[HI32] >> (32 - n));
+      r64[LO32] = (a64[HI32] << n) | (a64[LO32] >>> (32 - n));
+      r64[HI32] = (a64[LO32] << n) | (a64[HI32] >>> (32 - n));
     }
     return r64;
   }
@@ -187,8 +187,8 @@
 
       // ι
       RANGE_7.forEach(function (j) {
-        // FIXME Implement a64 shift right and shift left
-        R = (xor64((R << 1), ((R >> 7) * 0x71))) % 256;
+        // FIXME Implement Uint64 shift right and shift left
+        R = (xor64((R << 1), ((R >>> 7) * 0x71))) % 256;
         if (R & 2) {
           lanes[0][0] = xor64(lanes[0][0], (1 << ((1 << j) - 1)));
         }
