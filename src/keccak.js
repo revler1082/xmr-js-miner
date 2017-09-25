@@ -61,18 +61,15 @@
   /**
    * Rotate left Uint32Array(2)
    *
-   * FIXME Allocate a new array. Do not modify the array provided as an input.
    * TODO Create unit tests for this function.
    *
    * @param a64 {Uint32Array} of size 2 representing a Uint64
-   * @param n {Uint8} number of bits to rotate left
+   * @param n {Number} number of bits to rotate left
    * @returns {Uint32Array} of size 2 representing a Uint64
    */
   function rotl64(a64, n) {
     n = (n % 64) | 0;
-
     var r64 = new Uint32Array(2);
-
     if (n === 0) {
       r64[LO32] = a64[LO32];
       r64[HI32] = a64[HI32];
@@ -100,16 +97,13 @@
    */
   function xor64() {
     var a64 = new Uint32Array(2);
-    for (var i = 0; i < arguments.length; i++) {
-      var lo32 = arguments[i][LO32];
-      var hi32 = arguments[i][HI32];
-      if (i === 0) {
-        a64[LO32] = lo32;
-        a64[HI32] = hi32;
-      } else {
-        a64[LO32] = a64[LO32] ^ lo32;
-        a64[HI32] = a64[HI32] ^ hi32;
-      }
+    if (arguments.length) {
+      a64[LO32] = arguments[0][LO32];
+      a64[HI32] = arguments[0][HI32];
+    }
+    for (var i = 1; i < arguments.length; i++) {
+      a64[LO32] = a64[LO32] ^ arguments[i][LO32];
+      a64[HI32] = a64[HI32] ^ arguments[i][HI32];
     }
     return a64;
   }
@@ -124,16 +118,13 @@
    */
   function and64() {
     var a64 = new Uint32Array(2);
-    for (var i = 0; i < arguments.length; i++) {
-      var lo32 = arguments[i][LO32];
-      var hi32 = arguments[i][HI32];
-      if (i === 0) {
-        a64[LO32] = lo32;
-        a64[HI32] = hi32;
-      } else {
-        a64[LO32] = a64[LO32] & lo32;
-        a64[HI32] = a64[HI32] & hi32;
-      }
+    if (arguments.length) {
+      a64[LO32] = arguments[0][LO32];
+      a64[HI32] = arguments[0][HI32];
+    }
+    for (var i = 1; i < arguments.length; i++) {
+      a64[LO32] = a64[LO32] & arguments[i][LO32];
+      a64[HI32] = a64[HI32] & arguments[i][HI32];
     }
     return a64;
   }
