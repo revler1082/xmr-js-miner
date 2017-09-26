@@ -88,6 +88,11 @@
   
   */
   Uint64.prototype.and = function(x) {
+    if(!_isUint64(x)) {
+      // todo: accept other parameters and just create uint64 from type
+      throw new Error('argument must of type uint64');
+    }
+    
     return new Uint64(this.hi & x.hi, this.lo & x.lo);
   };
 
@@ -95,6 +100,11 @@
 
   */
   Uint64.prototype.or = function(x) {
+    if(!_isUint64(x)) {
+      // todo: accept other parameters and just create uint64 from type
+      throw new Error('argument must of type uint64');
+    }
+    
     return new Uint64(this.hi | x.hi, this.lo | x.lo);
   };
 
@@ -102,21 +112,54 @@
 
   */
   Uint64.prototype.xor = function(x) {
+    if(!_isUint64(x)) {
+      // todo: accept other parameters and just create uint64 from type
+      throw new Error('argument must of type uint64');
+    }
+    
     return new Uint64(this.hi ^ x.hi, this.lo ^ x.lo);
   };
 
   /**
 
   */
-  Uint64.prototype.shiftLeft = function(x) {
-    throw new Error('NOT YET IMPLEMENTED');
+  Uint64.prototype.shiftLeft = function(numBits) {
+    if(!numBits || typeof numBits !== 'number' || parseInt(numBits) < 0) {
+      throw new Error('invalid argument type, shiftLeft expects positive number');
+    }
+    
+    var cleanNumBits = parseInt(numBits); // already validated numBits as #
+    
+    // 0 is a no-op
+    if(cleanNumBits === 0) return new Uint64(this.hi, this.lo);
+    
+    // if we shift left more than 32, then the entire low order is zero'd out..
+    if(cleanNumBits >= 32) {
+      return new Uint64( (this.lo << (cleanNumBits - 32)) >>> 0, 0);
+    } else {
+      return new Uint64( (this.hi << cleanNumBits) | (this.lo >>> (32 - cleanNumBits)), (this.lo << numBits) >>> 0);
+    }
   };
   
   /**
   
   */
   Uint64.prototype.shiftRight = function(x) {
-    throw new Error('NOT YET IMPLEMENTED');
+    if(!numBits || typeof numBits !== 'number' || parseInt(numBits) < 0) {
+      throw new Error('invalid argument type, shiftRight expects positive number');
+    }
+    
+    var cleanNumBits = parseInt(numBits); // already validated numBits as #
+    
+    // 0 is a no-op
+    if(cleanNumBits === 0) return new Uint64(this.hi, this.lo);
+    
+    // if we shift right more than 32, then the entire high order is zero'd out..
+    if(cleanNumBits >= 32) {
+      return new Uint64(0, this.hi >> (cleanNumBits - 32));
+    } else {
+      return new Uint64( this.hi >>> 32, ( (this.lo >>> cleanNumBits) | (this.hi << (32 - cleanNumBits)) ) >>> 0 );
+    }
   };
   
   /**
